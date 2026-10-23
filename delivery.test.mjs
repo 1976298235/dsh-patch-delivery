@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtemp, mkdir, writeFile, readFile, unlink, rmdir } from 'node:fs/promises'
+import { mkdtemp, mkdir, writeFile, readFile, unlink, rmdir, symlink, realpath } from 'node:fs/promises'
 import { resolve, join } from 'node:path'
 import { tmpdir } from 'node:os'
 import { execFileSync } from 'node:child_process'
@@ -83,11 +83,25 @@ test('Git symlink modes are rejected even with Windows regular-file checkout', a
   const f = await fixture(async cwd => { await unlink(join(cwd, 'a.txt')); await writeFile(join(cwd, 'a.txt'), 'new target') })
   try {
     const blob = git(f.repo, 'rev-parse', 'HEAD:a.txt').trim()
+    git(f.repo, 'config', 'core.symlinks', 'false')
     git(f.repo, 'update-index', '--cacheinfo', `120000,${blob},a.txt`)
     git(f.repo, 'commit', '-qm', 'symlink baseline')
     const job = await f.manager.start(f.args)
     await assert.rejects(f.manager.collect(job.delivery_id), error => ['UNSUPPORTED_FILE', 'SYMLINK_NOT_SUPPORTED'].includes(error.code))
   } finally { await f.manager.dispose() }
+})
+
+test('managed storage canonicalizes directory aliases before containment checks', async () => {
+  const f = await fixture(cwd => writeFile(join(cwd, 'a.txt'), 'new'))
+  await f.manager.dispose()
+  const alias = join(f.root, 'state-alias')
+  await symlink(f.options.stateDirectory, alias, process.platform === 'win32' ? 'junction' : 'dir')
+  const manager = new DeliveryManager({ ...f.options, stateDirectory: alias })
+  try {
+    assert.equal(manager.root, await realpath(f.options.stateDirectory))
+    const job = await manager.start(f.args)
+    assert.equal((await manager.collect(job.delivery_id)).phase, 'ready_for_review')
+  } finally { await manager.dispose() }
 })
 
 test('deleted Git submodule cannot be delivered as regular files', async () => {
