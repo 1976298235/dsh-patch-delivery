@@ -1,0 +1,46 @@
+{
+  "name": "dsh-patch-delivery",
+  "version": "1.2.0",
+  "type": "module",
+  "description": "Reviewable DSH subagent code delivery: isolated worktrees, real verification evidence, durable receipts and guarded patch adoption.",
+  "exports": {
+    ".": "./index.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "delivery.js",
+    "state-store.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "README.md",
+    "LICENSE"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test delivery.test.mjs runtime.test.mjs && node dryrun.mjs"
+  },
+  "keywords": [
+    "deepseek-harness",
+    "dsh-plugin",
+    "mcp",
+    "git-worktree",
+    "subagents"
+  ],
+  "author": "1976298235",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/1976298235/dsh-patch-delivery.git"
+  },
+  "homepage": "https://github.com/1976298235/dsh-patch-delivery#readme",
+  "bugs": {
+    "url": "https://github.com/1976298235/dsh-patch-delivery/issues"
+  }
+}

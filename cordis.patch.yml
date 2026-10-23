@@ -1,0 +1,9 @@
+- insert:
+    - id: dsh-patch-delivery
+      name: dsh-patch-delivery
+      config:
+        path: /mcp
+        token: ''
+        exposeApprovals: true
+        waitTimeoutMs: 120000
+        verificationRecipes: []
