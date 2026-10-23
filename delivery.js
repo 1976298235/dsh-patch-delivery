@@ -24,7 +24,7 @@ export class DeliveryManager {
   constructor({ stateDirectory, backend, recipes = [] }) {
     this.root = resolve(stateDirectory)
     this.store = new StateFile(join(this.root, 'deliveries.json'))
-    this.root = realpathSync(this.root) // Windows temp roots may use an 8.3 alias or junction.
+    this.root = realpathSync.native(this.root) // Match promises.realpath: expand Windows 8.3 aliases.
     this.jobs = new Map((this.store.data?.jobs ?? []).map((job) => [job.delivery_id, job]))
     this.backend = backend
     this.recipes = new Map()
